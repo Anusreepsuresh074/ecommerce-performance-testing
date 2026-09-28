@@ -1,0 +1,1623 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  
+  
+  <hashTree>
+    
+    
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="DummyJSON Shopper Journey" enabled="true">
+      
+      
+      <stringProp name="TestPlan.comments">Built by jmeter-test-plan from context/perf-test-plan.md v1.0 (APPROVED 2026-09-28). One script for every scenario: load shape comes from config/profiles/&lt;scenario&gt;.properties. Run only through scripts/run-test.sh (non-GUI). No listeners on purpose.</stringProp>
+      
+      
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      
+      
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      
+      
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      
+      
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        
+        
+        <collectionProp name="Arguments.arguments">
+          
+          
+          <elementProp name="username" elementType="Argument">
+            
+            
+            <stringProp name="Argument.name">username</stringProp>
+            
+            
+            <stringProp name="Argument.value">${__groovy(System.getenv('AUTH_USERNAME'))}</stringProp>
+            
+            
+            <stringProp name="Argument.metadata">=</stringProp>
+            
+          
+          </elementProp>
+          
+          
+          <elementProp name="password" elementType="Argument">
+            
+            
+            <stringProp name="Argument.name">password</stringProp>
+            
+            
+            <stringProp name="Argument.value">${__groovy(System.getenv('AUTH_PASSWORD'))}</stringProp>
+            
+            
+            <stringProp name="Argument.metadata">=</stringProp>
+            
+          
+          </elementProp>
+          
+        
+        </collectionProp>
+        
+      
+      </elementProp>
+      
+      
+      <stringProp name="TestPlan.user_define_classpath"/>
+      
+    
+    </TestPlan>
+    
+    
+    <hashTree>
+      
+      
+      <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+        
+        
+        <stringProp name="TestPlan.comments">Server address comes from config/env/&lt;env&gt;.properties (-q).</stringProp>
+        
+        
+        <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+          
+          
+          <collectionProp name="Arguments.arguments"/>
+          
+        
+        </elementProp>
+        
+        
+        <stringProp name="HTTPSampler.domain">${__P(host)}</stringProp>
+        
+        
+        <stringProp name="HTTPSampler.port">${__P(port,)}</stringProp>
+        
+        
+        <stringProp name="HTTPSampler.protocol">${__P(protocol,https)}</stringProp>
+        
+        
+        <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+        
+        
+        <stringProp name="HTTPSampler.path"/>
+        
+        
+        <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        
+        
+        <stringProp name="HTTPSampler.connect_timeout">10000</stringProp>
+        
+        
+        <stringProp name="HTTPSampler.response_timeout">30000</stringProp>
+        
+      
+      </ConfigTestElement>
+      
+      
+      <hashTree/>
+      
+      
+      <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Common headers" enabled="true">
+        
+        
+        <collectionProp name="HeaderManager.headers">
+          
+          
+          <elementProp name="" elementType="Header">
+            
+            
+            <stringProp name="Header.name">Accept</stringProp>
+            
+            
+            <stringProp name="Header.value">application/json</stringProp>
+            
+          
+          </elementProp>
+          
+          
+          <elementProp name="" elementType="Header">
+            
+            
+            <stringProp name="Header.name">Accept-Encoding</stringProp>
+            
+            
+            <stringProp name="Header.value">gzip, deflate</stringProp>
+            
+          
+          </elementProp>
+          
+          
+          <elementProp name="" elementType="Header">
+            
+            
+            <stringProp name="Header.name">User-Agent</stringProp>
+            
+            
+            <stringProp name="Header.value">ecommerce-performance-testing (Apache JMeter 5.6.3)</stringProp>
+            
+          
+          </elementProp>
+          
+        
+        </collectionProp>
+        
+      
+      </HeaderManager>
+      
+      
+      <hashTree/>
+      
+      
+      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Search terms" enabled="true">
+        
+        
+        <stringProp name="TestPlan.comments">Plan section 10. Path is relative to this .jmx file.</stringProp>
+        
+        
+        <stringProp name="delimiter">,</stringProp>
+        
+        
+        <stringProp name="fileEncoding">UTF-8</stringProp>
+        
+        
+        <stringProp name="filename">../data/search-terms.csv</stringProp>
+        
+        
+        <boolProp name="ignoreFirstLine">true</boolProp>
+        
+        
+        <boolProp name="quotedData">false</boolProp>
+        
+        
+        <boolProp name="recycle">true</boolProp>
+        
+        
+        <stringProp name="shareMode">shareMode.all</stringProp>
+        
+        
+        <boolProp name="stopThread">false</boolProp>
+        
+        
+        <stringProp name="variableNames">term</stringProp>
+        
+      
+      </CSVDataSet>
+      
+      
+      <hashTree/>
+      
+      
+      <TestFragmentController guiclass="TestFragmentControllerGui" testclass="TestFragmentController" testname="Shopper Journey" enabled="true">
+        
+        
+        <stringProp name="TestPlan.comments">The Shopper journey (plan 6.1), defined once. Thread Groups call it with Module Controllers.</stringProp>
+        
+      
+      </TestFragmentController>
+      
+      
+      <hashTree>
+        
+        
+        <TestAction guiclass="TestActionGui" testclass="TestAction" testname="Pacing" enabled="true">
+          
+          
+          <stringProp name="TestPlan.comments">Does nothing itself; its timer waits until this user's next iteration slot. Produces no sample.</stringProp>
+          
+          
+          <intProp name="ActionProcessor.action">1</intProp>
+          
+          
+          <intProp name="ActionProcessor.target">0</intProp>
+          
+          
+          <stringProp name="ActionProcessor.duration">0</stringProp>
+          
+        
+        </TestAction>
+        
+        
+        <hashTree>
+          
+          
+          <JSR223Timer guiclass="TestBeanGUI" testclass="JSR223Timer" testname="Pacing timer" enabled="true">
+            
+            
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            
+            
+            <stringProp name="parameters"/>
+            
+            
+            <stringProp name="filename"/>
+            
+            
+            <stringProp name="cacheKey">true</stringProp>
+            
+            
+            <stringProp name="script">// Plan 6.2: each virtual user starts an iteration every pacing.ms, whatever the response times.
+long pacing = Long.parseLong(props.getProperty('pacing.ms', '24000'))
+long now = System.currentTimeMillis()
+Object last = vars.getObject('iterationStart')
+long wait = (last == null) ? 0L : Math.max(0L, ((Long) last) + pacing - now)
+vars.putObject('iterationStart', now + wait)
+return wait</stringProp>
+            
+          
+          </JSR223Timer>
+          
+          
+          <hashTree/>
+          
+        
+        </hashTree>
+        
+        
+        <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Journey T01-T05" enabled="true">
+          
+          
+          <stringProp name="TestPlan.comments">Everything here applies to each of the 5 transactions.</stringProp>
+          
+        
+        </GenericController>
+        
+        
+        <hashTree>
+          
+          
+          <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Safety ceiling (5 req/s shared)" enabled="true">
+            
+            
+            <stringProp name="TestPlan.comments">Plan section 13: hard ceiling for all threads together. Pacing normally keeps the load far below it.</stringProp>
+            
+            
+            <intProp name="calcMode">3</intProp>
+            
+            
+            <stringProp name="throughput">${__P(safety.max.samples.per.min,300)}</stringProp>
+            
+          
+          </ConstantThroughputTimer>
+          
+          
+          <hashTree/>
+          
+          
+          <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Record cf-cache-status" enabled="true">
+            
+            
+            <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+            
+            
+            <stringProp name="RegexExtractor.refname">cacheStatus</stringProp>
+            
+            
+            <stringProp name="RegexExtractor.regex">(?i)cf-cache-status:\s*(\S+)</stringProp>
+            
+            
+            <stringProp name="RegexExtractor.template">$1$</stringProp>
+            
+            
+            <stringProp name="RegexExtractor.default">NONE</stringProp>
+            
+            
+            <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+            
+            
+            <stringProp name="RegexExtractor.match_number">1</stringProp>
+            
+          
+          </RegexExtractor>
+          
+          
+          <hashTree/>
+          
+          
+          <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Record x-ratelimit-remaining" enabled="true">
+            
+            
+            <stringProp name="RegexExtractor.useHeaders">true</stringProp>
+            
+            
+            <stringProp name="RegexExtractor.refname">rateLimitRemaining</stringProp>
+            
+            
+            <stringProp name="RegexExtractor.regex">(?i)x-ratelimit-remaining:\s*(\d+)</stringProp>
+            
+            
+            <stringProp name="RegexExtractor.template">$1$</stringProp>
+            
+            
+            <stringProp name="RegexExtractor.default">NONE</stringProp>
+            
+            
+            <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+            
+            
+            <stringProp name="RegexExtractor.match_number">1</stringProp>
+            
+          
+          </RegexExtractor>
+          
+          
+          <hashTree/>
+          
+          
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Stop test on 429" enabled="true">
+            
+            
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            
+            
+            <stringProp name="parameters"/>
+            
+            
+            <stringProp name="filename"/>
+            
+            
+            <stringProp name="cacheKey">true</stringProp>
+            
+            
+            <stringProp name="script">// Plan NFR-07 / 12.3: a 429 means our load is too heavy. Stop the whole test at once; the run is invalid.
+if (prev.getResponseCode() == '429') {
+    log.error('Rate limit response (429) on ' + prev.getSampleLabel() + ' - stopping the test. This run is INVALID.')
+    prev.setStopTestNow(true)
+}</stringProp>
+            
+          
+          </JSR223PostProcessor>
+          
+          
+          <hashTree/>
+          
+          
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T01_Login" enabled="true">
+            
+            
+            <stringProp name="TestPlan.comments">Plan 6.1 T01. Credentials come from AUTH_USERNAME / AUTH_PASSWORD (context/perf-auth.md).</stringProp>
+            
+            
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            
+            
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              
+              
+              <collectionProp name="Arguments.arguments">
+                
+                
+                <elementProp name="" elementType="HTTPArgument">
+                  
+                  
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  
+                  
+                  <stringProp name="Argument.value">{&quot;username&quot;:&quot;${username}&quot;,&quot;password&quot;:&quot;${password}&quot;}</stringProp>
+                  
+                  
+                  <stringProp name="Argument.metadata">=</stringProp>
+                  
+                
+                </elementProp>
+                
+              
+              </collectionProp>
+              
+            
+            </elementProp>
+            
+            
+            <stringProp name="HTTPSampler.domain"/>
+            
+            
+            <stringProp name="HTTPSampler.port"/>
+            
+            
+            <stringProp name="HTTPSampler.protocol"/>
+            
+            
+            <stringProp name="HTTPSampler.contentEncoding"/>
+            
+            
+            <stringProp name="HTTPSampler.path">/auth/login</stringProp>
+            
+            
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            
+            
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            
+            
+            <stringProp name="HTTPSampler.embedded_url_re"/>
+            
+            
+            <stringProp name="HTTPSampler.connect_timeout"/>
+            
+            
+            <stringProp name="HTTPSampler.response_timeout"/>
+            
+          
+          </HTTPSamplerProxy>
+          
+          
+          <hashTree>
+            
+            
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type JSON" enabled="true">
+              
+              
+              <collectionProp name="HeaderManager.headers">
+                
+                
+                <elementProp name="" elementType="Header">
+                  
+                  
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  
+                  
+                  <stringProp name="Header.value">application/json</stringProp>
+                  
+                
+                </elementProp>
+                
+              
+              </collectionProp>
+              
+            
+            </HeaderManager>
+            
+            
+            <hashTree/>
+            
+            
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract accessToken" enabled="true">
+              
+              
+              <stringProp name="JSONPostProcessor.referenceNames">accessToken</stringProp>
+              
+              
+              <stringProp name="JSONPostProcessor.jsonPathExprs">$.accessToken</stringProp>
+              
+              
+              <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>
+              
+              
+              <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
+              
+            
+            </JSONPostProcessor>
+            
+            
+            <hashTree/>
+            
+            
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert status 200" enabled="true">
+              
+              
+              <collectionProp name="Asserion.test_strings">
+                
+                
+                <stringProp name="49586">200</stringProp>
+                
+              
+              </collectionProp>
+              
+              
+              <stringProp name="Assertion.custom_message"/>
+              
+              
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              
+              
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              
+              
+              <intProp name="Assertion.test_type">8</intProp>
+              
+            
+            </ResponseAssertion>
+            
+            
+            <hashTree/>
+            
+            
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert accessToken exists" enabled="true">
+              
+              
+              <stringProp name="JSON_PATH">$.accessToken</stringProp>
+              
+              
+              <stringProp name="EXPECTED_VALUE"/>
+              
+              
+              <boolProp name="JSONVALIDATION">false</boolProp>
+              
+              
+              <boolProp name="EXPECT_NULL">false</boolProp>
+              
+              
+              <boolProp name="INVERT">false</boolProp>
+              
+              
+              <boolProp name="ISREGEX">false</boolProp>
+              
+            
+            </JSONPathAssertion>
+            
+            
+            <hashTree/>
+            
+          
+          </hashTree>
+          
+          
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T02_Get_Current_User" enabled="true">
+            
+            
+            <stringProp name="TestPlan.comments">Plan 6.1 T02. The only request that sends the token.</stringProp>
+            
+            
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+              
+              
+              <collectionProp name="Arguments.arguments"/>
+              
+            
+            </elementProp>
+            
+            
+            <stringProp name="HTTPSampler.domain"/>
+            
+            
+            <stringProp name="HTTPSampler.port"/>
+            
+            
+            <stringProp name="HTTPSampler.protocol"/>
+            
+            
+            <stringProp name="HTTPSampler.contentEncoding"/>
+            
+            
+            <stringProp name="HTTPSampler.path">/auth/me</stringProp>
+            
+            
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            
+            
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            
+            
+            <stringProp name="HTTPSampler.embedded_url_re"/>
+            
+            
+            <stringProp name="HTTPSampler.connect_timeout"/>
+            
+            
+            <stringProp name="HTTPSampler.response_timeout"/>
+            
+          
+          </HTTPSamplerProxy>
+          
+          
+          <hashTree>
+            
+            
+            <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think time" enabled="true">
+              
+              
+              <stringProp name="TestPlan.comments">Plan 6.2: 2-4 s between transactions. Timers run before their sampler, so this is the pause after the previous step.</stringProp>
+              
+              
+              <stringProp name="ConstantTimer.delay">${__P(think.min.ms,2000)}</stringProp>
+              
+              
+              <stringProp name="RandomTimer.range">${__P(think.range.ms,2000)}</stringProp>
+              
+            
+            </UniformRandomTimer>
+            
+            
+            <hashTree/>
+            
+            
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Bearer token" enabled="true">
+              
+              
+              <collectionProp name="HeaderManager.headers">
+                
+                
+                <elementProp name="" elementType="Header">
+                  
+                  
+                  <stringProp name="Header.name">Authorization</stringProp>
+                  
+                  
+                  <stringProp name="Header.value">Bearer ${accessToken}</stringProp>
+                  
+                
+                </elementProp>
+                
+              
+              </collectionProp>
+              
+            
+            </HeaderManager>
+            
+            
+            <hashTree/>
+            
+            
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert status 200" enabled="true">
+              
+              
+              <collectionProp name="Asserion.test_strings">
+                
+                
+                <stringProp name="49586">200</stringProp>
+                
+              
+              </collectionProp>
+              
+              
+              <stringProp name="Assertion.custom_message"/>
+              
+              
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              
+              
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              
+              
+              <intProp name="Assertion.test_type">8</intProp>
+              
+            
+            </ResponseAssertion>
+            
+            
+            <hashTree/>
+            
+            
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert username exists" enabled="true">
+              
+              
+              <stringProp name="JSON_PATH">$.username</stringProp>
+              
+              
+              <stringProp name="EXPECTED_VALUE"/>
+              
+              
+              <boolProp name="JSONVALIDATION">false</boolProp>
+              
+              
+              <boolProp name="EXPECT_NULL">false</boolProp>
+              
+              
+              <boolProp name="INVERT">false</boolProp>
+              
+              
+              <boolProp name="ISREGEX">false</boolProp>
+              
+            
+            </JSONPathAssertion>
+            
+            
+            <hashTree/>
+            
+          
+          </hashTree>
+          
+          
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T03_Browse_Products" enabled="true">
+            
+            
+            <stringProp name="TestPlan.comments">Plan 6.1 T03. Random skip (0-180) so requests reach the server, not the CDN cache.</stringProp>
+            
+            
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+              
+              
+              <collectionProp name="Arguments.arguments">
+                
+                
+                <elementProp name="limit" elementType="HTTPArgument">
+                  
+                  
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  
+                  
+                  <stringProp name="Argument.value">30</stringProp>
+                  
+                  
+                  <stringProp name="Argument.metadata">=</stringProp>
+                  
+                  
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  
+                  
+                  <stringProp name="Argument.name">limit</stringProp>
+                  
+                
+                </elementProp>
+                
+                
+                <elementProp name="skip" elementType="HTTPArgument">
+                  
+                  
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  
+                  
+                  <stringProp name="Argument.value">${__groovy(java.util.concurrent.ThreadLocalRandom.current().nextInt(7) * 30)}</stringProp>
+                  
+                  
+                  <stringProp name="Argument.metadata">=</stringProp>
+                  
+                  
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  
+                  
+                  <stringProp name="Argument.name">skip</stringProp>
+                  
+                
+                </elementProp>
+                
+              
+              </collectionProp>
+              
+            
+            </elementProp>
+            
+            
+            <stringProp name="HTTPSampler.domain"/>
+            
+            
+            <stringProp name="HTTPSampler.port"/>
+            
+            
+            <stringProp name="HTTPSampler.protocol"/>
+            
+            
+            <stringProp name="HTTPSampler.contentEncoding"/>
+            
+            
+            <stringProp name="HTTPSampler.path">/products</stringProp>
+            
+            
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            
+            
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            
+            
+            <stringProp name="HTTPSampler.embedded_url_re"/>
+            
+            
+            <stringProp name="HTTPSampler.connect_timeout"/>
+            
+            
+            <stringProp name="HTTPSampler.response_timeout"/>
+            
+          
+          </HTTPSamplerProxy>
+          
+          
+          <hashTree>
+            
+            
+            <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think time" enabled="true">
+              
+              
+              <stringProp name="TestPlan.comments">Plan 6.2: 2-4 s between transactions. Timers run before their sampler, so this is the pause after the previous step.</stringProp>
+              
+              
+              <stringProp name="ConstantTimer.delay">${__P(think.min.ms,2000)}</stringProp>
+              
+              
+              <stringProp name="RandomTimer.range">${__P(think.range.ms,2000)}</stringProp>
+              
+            
+            </UniformRandomTimer>
+            
+            
+            <hashTree/>
+            
+            
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert status 200" enabled="true">
+              
+              
+              <collectionProp name="Asserion.test_strings">
+                
+                
+                <stringProp name="49586">200</stringProp>
+                
+              
+              </collectionProp>
+              
+              
+              <stringProp name="Assertion.custom_message"/>
+              
+              
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              
+              
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              
+              
+              <intProp name="Assertion.test_type">8</intProp>
+              
+            
+            </ResponseAssertion>
+            
+            
+            <hashTree/>
+            
+            
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert at least one product" enabled="true">
+              
+              
+              <stringProp name="JSON_PATH">$.products[0].id</stringProp>
+              
+              
+              <stringProp name="EXPECTED_VALUE"/>
+              
+              
+              <boolProp name="JSONVALIDATION">false</boolProp>
+              
+              
+              <boolProp name="EXPECT_NULL">false</boolProp>
+              
+              
+              <boolProp name="INVERT">false</boolProp>
+              
+              
+              <boolProp name="ISREGEX">false</boolProp>
+              
+            
+            </JSONPathAssertion>
+            
+            
+            <hashTree/>
+            
+          
+          </hashTree>
+          
+          
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T04_Search_Products" enabled="true">
+            
+            
+            <stringProp name="TestPlan.comments">Plan 6.1 T04. term from data/search-terms.csv; a random result id is correlated into T05.</stringProp>
+            
+            
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+              
+              
+              <collectionProp name="Arguments.arguments">
+                
+                
+                <elementProp name="q" elementType="HTTPArgument">
+                  
+                  
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  
+                  
+                  <stringProp name="Argument.value">${term}</stringProp>
+                  
+                  
+                  <stringProp name="Argument.metadata">=</stringProp>
+                  
+                  
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  
+                  
+                  <stringProp name="Argument.name">q</stringProp>
+                  
+                
+                </elementProp>
+                
+              
+              </collectionProp>
+              
+            
+            </elementProp>
+            
+            
+            <stringProp name="HTTPSampler.domain"/>
+            
+            
+            <stringProp name="HTTPSampler.port"/>
+            
+            
+            <stringProp name="HTTPSampler.protocol"/>
+            
+            
+            <stringProp name="HTTPSampler.contentEncoding"/>
+            
+            
+            <stringProp name="HTTPSampler.path">/products/search</stringProp>
+            
+            
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            
+            
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            
+            
+            <stringProp name="HTTPSampler.embedded_url_re"/>
+            
+            
+            <stringProp name="HTTPSampler.connect_timeout"/>
+            
+            
+            <stringProp name="HTTPSampler.response_timeout"/>
+            
+          
+          </HTTPSamplerProxy>
+          
+          
+          <hashTree>
+            
+            
+            <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think time" enabled="true">
+              
+              
+              <stringProp name="TestPlan.comments">Plan 6.2: 2-4 s between transactions. Timers run before their sampler, so this is the pause after the previous step.</stringProp>
+              
+              
+              <stringProp name="ConstantTimer.delay">${__P(think.min.ms,2000)}</stringProp>
+              
+              
+              <stringProp name="RandomTimer.range">${__P(think.range.ms,2000)}</stringProp>
+              
+            
+            </UniformRandomTimer>
+            
+            
+            <hashTree/>
+            
+            
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract random productId" enabled="true">
+              
+              
+              <stringProp name="JSONPostProcessor.referenceNames">productId</stringProp>
+              
+              
+              <stringProp name="JSONPostProcessor.jsonPathExprs">$.products[*].id</stringProp>
+              
+              
+              <stringProp name="JSONPostProcessor.match_numbers">0</stringProp>
+              
+              
+              <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
+              
+            
+            </JSONPostProcessor>
+            
+            
+            <hashTree/>
+            
+            
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert status 200" enabled="true">
+              
+              
+              <collectionProp name="Asserion.test_strings">
+                
+                
+                <stringProp name="49586">200</stringProp>
+                
+              
+              </collectionProp>
+              
+              
+              <stringProp name="Assertion.custom_message"/>
+              
+              
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              
+              
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              
+              
+              <intProp name="Assertion.test_type">8</intProp>
+              
+            
+            </ResponseAssertion>
+            
+            
+            <hashTree/>
+            
+            
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert total &gt; 0" enabled="true">
+              
+              
+              <stringProp name="JSON_PATH">$.total</stringProp>
+              
+              
+              <stringProp name="EXPECTED_VALUE">[1-9][0-9]*</stringProp>
+              
+              
+              <boolProp name="JSONVALIDATION">true</boolProp>
+              
+              
+              <boolProp name="EXPECT_NULL">false</boolProp>
+              
+              
+              <boolProp name="INVERT">false</boolProp>
+              
+              
+              <boolProp name="ISREGEX">true</boolProp>
+              
+            
+            </JSONPathAssertion>
+            
+            
+            <hashTree/>
+            
+          
+          </hashTree>
+          
+          
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="T05_View_Product" enabled="true">
+            
+            
+            <stringProp name="TestPlan.comments">Plan 6.1 T05. Opens the product found in T04.</stringProp>
+            
+            
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+              
+              
+              <collectionProp name="Arguments.arguments"/>
+              
+            
+            </elementProp>
+            
+            
+            <stringProp name="HTTPSampler.domain"/>
+            
+            
+            <stringProp name="HTTPSampler.port"/>
+            
+            
+            <stringProp name="HTTPSampler.protocol"/>
+            
+            
+            <stringProp name="HTTPSampler.contentEncoding"/>
+            
+            
+            <stringProp name="HTTPSampler.path">/products/${productId}</stringProp>
+            
+            
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            
+            
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            
+            
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            
+            
+            <stringProp name="HTTPSampler.embedded_url_re"/>
+            
+            
+            <stringProp name="HTTPSampler.connect_timeout"/>
+            
+            
+            <stringProp name="HTTPSampler.response_timeout"/>
+            
+          
+          </HTTPSamplerProxy>
+          
+          
+          <hashTree>
+            
+            
+            <UniformRandomTimer guiclass="UniformRandomTimerGui" testclass="UniformRandomTimer" testname="Think time" enabled="true">
+              
+              
+              <stringProp name="TestPlan.comments">Plan 6.2: 2-4 s between transactions. Timers run before their sampler, so this is the pause after the previous step.</stringProp>
+              
+              
+              <stringProp name="ConstantTimer.delay">${__P(think.min.ms,2000)}</stringProp>
+              
+              
+              <stringProp name="RandomTimer.range">${__P(think.range.ms,2000)}</stringProp>
+              
+            
+            </UniformRandomTimer>
+            
+            
+            <hashTree/>
+            
+            
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert status 200" enabled="true">
+              
+              
+              <collectionProp name="Asserion.test_strings">
+                
+                
+                <stringProp name="49586">200</stringProp>
+                
+              
+              </collectionProp>
+              
+              
+              <stringProp name="Assertion.custom_message"/>
+              
+              
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              
+              
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              
+              
+              <intProp name="Assertion.test_type">8</intProp>
+              
+            
+            </ResponseAssertion>
+            
+            
+            <hashTree/>
+            
+            
+            <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="Assert id matches" enabled="true">
+              
+              
+              <stringProp name="JSON_PATH">$.id</stringProp>
+              
+              
+              <stringProp name="EXPECTED_VALUE">${productId}</stringProp>
+              
+              
+              <boolProp name="JSONVALIDATION">true</boolProp>
+              
+              
+              <boolProp name="EXPECT_NULL">false</boolProp>
+              
+              
+              <boolProp name="INVERT">false</boolProp>
+              
+              
+              <boolProp name="ISREGEX">false</boolProp>
+              
+            
+            </JSONPathAssertion>
+            
+            
+            <hashTree/>
+            
+          
+          </hashTree>
+          
+        
+        </hashTree>
+        
+      
+      </hashTree>
+      
+      
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG1" enabled="true">
+        
+        
+        <stringProp name="TestPlan.comments">Driven by tg1.* properties from config/profiles/. 0 threads = not used by this profile.</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.on_sample_error">startnextloop</stringProp>
+        
+        
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          
+          
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          
+          
+          <stringProp name="LoopController.loops">${__P(tg1.loops,-1)}</stringProp>
+          
+        
+        </elementProp>
+        
+        
+        <stringProp name="ThreadGroup.num_threads">${__P(tg1.threads,0)}</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.ramp_time">${__P(tg1.rampup,0)}</stringProp>
+        
+        
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        
+        
+        <stringProp name="ThreadGroup.duration">${__P(tg1.duration,60)}</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.delay">${__P(tg1.delay,0)}</stringProp>
+        
+        
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        
+      
+      </ThreadGroup>
+      
+      
+      <hashTree>
+        
+        
+        <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="Run Shopper Journey" enabled="true">
+          
+          
+          <collectionProp name="ModuleController.node_path">
+            
+            
+            <stringProp name="764597751">Test Plan</stringProp>
+            
+            
+            <stringProp name="1">DummyJSON Shopper Journey</stringProp>
+            
+            
+            <stringProp name="2">Shopper Journey</stringProp>
+            
+          
+          </collectionProp>
+          
+        
+        </ModuleController>
+        
+        
+        <hashTree/>
+        
+      
+      </hashTree>
+      
+      
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG2" enabled="true">
+        
+        
+        <stringProp name="TestPlan.comments">Driven by tg2.* properties from config/profiles/. 0 threads = not used by this profile.</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.on_sample_error">startnextloop</stringProp>
+        
+        
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          
+          
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          
+          
+          <stringProp name="LoopController.loops">${__P(tg2.loops,-1)}</stringProp>
+          
+        
+        </elementProp>
+        
+        
+        <stringProp name="ThreadGroup.num_threads">${__P(tg2.threads,0)}</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.ramp_time">${__P(tg2.rampup,0)}</stringProp>
+        
+        
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        
+        
+        <stringProp name="ThreadGroup.duration">${__P(tg2.duration,60)}</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.delay">${__P(tg2.delay,0)}</stringProp>
+        
+        
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        
+      
+      </ThreadGroup>
+      
+      
+      <hashTree>
+        
+        
+        <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="Run Shopper Journey" enabled="true">
+          
+          
+          <collectionProp name="ModuleController.node_path">
+            
+            
+            <stringProp name="764597751">Test Plan</stringProp>
+            
+            
+            <stringProp name="1">DummyJSON Shopper Journey</stringProp>
+            
+            
+            <stringProp name="2">Shopper Journey</stringProp>
+            
+          
+          </collectionProp>
+          
+        
+        </ModuleController>
+        
+        
+        <hashTree/>
+        
+      
+      </hashTree>
+      
+      
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG3" enabled="true">
+        
+        
+        <stringProp name="TestPlan.comments">Driven by tg3.* properties from config/profiles/. 0 threads = not used by this profile.</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.on_sample_error">startnextloop</stringProp>
+        
+        
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          
+          
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          
+          
+          <stringProp name="LoopController.loops">${__P(tg3.loops,-1)}</stringProp>
+          
+        
+        </elementProp>
+        
+        
+        <stringProp name="ThreadGroup.num_threads">${__P(tg3.threads,0)}</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.ramp_time">${__P(tg3.rampup,0)}</stringProp>
+        
+        
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        
+        
+        <stringProp name="ThreadGroup.duration">${__P(tg3.duration,60)}</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.delay">${__P(tg3.delay,0)}</stringProp>
+        
+        
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        
+      
+      </ThreadGroup>
+      
+      
+      <hashTree>
+        
+        
+        <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="Run Shopper Journey" enabled="true">
+          
+          
+          <collectionProp name="ModuleController.node_path">
+            
+            
+            <stringProp name="764597751">Test Plan</stringProp>
+            
+            
+            <stringProp name="1">DummyJSON Shopper Journey</stringProp>
+            
+            
+            <stringProp name="2">Shopper Journey</stringProp>
+            
+          
+          </collectionProp>
+          
+        
+        </ModuleController>
+        
+        
+        <hashTree/>
+        
+      
+      </hashTree>
+      
+      
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG4" enabled="true">
+        
+        
+        <stringProp name="TestPlan.comments">Driven by tg4.* properties from config/profiles/. 0 threads = not used by this profile.</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.on_sample_error">startnextloop</stringProp>
+        
+        
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          
+          
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          
+          
+          <stringProp name="LoopController.loops">${__P(tg4.loops,-1)}</stringProp>
+          
+        
+        </elementProp>
+        
+        
+        <stringProp name="ThreadGroup.num_threads">${__P(tg4.threads,0)}</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.ramp_time">${__P(tg4.rampup,0)}</stringProp>
+        
+        
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        
+        
+        <stringProp name="ThreadGroup.duration">${__P(tg4.duration,60)}</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.delay">${__P(tg4.delay,0)}</stringProp>
+        
+        
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        
+      
+      </ThreadGroup>
+      
+      
+      <hashTree>
+        
+        
+        <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="Run Shopper Journey" enabled="true">
+          
+          
+          <collectionProp name="ModuleController.node_path">
+            
+            
+            <stringProp name="764597751">Test Plan</stringProp>
+            
+            
+            <stringProp name="1">DummyJSON Shopper Journey</stringProp>
+            
+            
+            <stringProp name="2">Shopper Journey</stringProp>
+            
+          
+          </collectionProp>
+          
+        
+        </ModuleController>
+        
+        
+        <hashTree/>
+        
+      
+      </hashTree>
+      
+      
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG5" enabled="true">
+        
+        
+        <stringProp name="TestPlan.comments">Driven by tg5.* properties from config/profiles/. 0 threads = not used by this profile.</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.on_sample_error">startnextloop</stringProp>
+        
+        
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          
+          
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          
+          
+          <stringProp name="LoopController.loops">${__P(tg5.loops,-1)}</stringProp>
+          
+        
+        </elementProp>
+        
+        
+        <stringProp name="ThreadGroup.num_threads">${__P(tg5.threads,0)}</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.ramp_time">${__P(tg5.rampup,0)}</stringProp>
+        
+        
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        
+        
+        <stringProp name="ThreadGroup.duration">${__P(tg5.duration,60)}</stringProp>
+        
+        
+        <stringProp name="ThreadGroup.delay">${__P(tg5.delay,0)}</stringProp>
+        
+        
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        
+      
+      </ThreadGroup>
+      
+      
+      <hashTree>
+        
+        
+        <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="Run Shopper Journey" enabled="true">
+          
+          
+          <collectionProp name="ModuleController.node_path">
+            
+            
+            <stringProp name="764597751">Test Plan</stringProp>
+            
+            
+            <stringProp name="1">DummyJSON Shopper Journey</stringProp>
+            
+            
+            <stringProp name="2">Shopper Journey</stringProp>
+            
+          
+          </collectionProp>
+          
+        
+        </ModuleController>
+        
+        
+        <hashTree/>
+        
+      
+      </hashTree>
+      
+    
+    </hashTree>
+    
+  
+  </hashTree>
+  
+
+</jmeterTestPlan>

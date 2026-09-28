@@ -1,0 +1,208 @@
+{
+  "_comment": "Written by run-perf-test from context/perf-test-plan.md v1.0 (APPROVED 2026-09-28). Windows are seconds from the run's first sample. Change the plan, not this file.",
+  "plan_version": "1.0",
+  "caps": {
+    "max_users": 15,
+    "max_duration_s": 900,
+    "max_throughput_rps": 5,
+    "injector_cpu_max_pct": 80,
+    "min_rate_limit_remaining": 80,
+    "min_gap_between_runs_s": 120,
+    "suspend_error_rate_pct": 10,
+    "suspend_error_window_s": 60,
+    "max_runs_per_day": {
+      "load": 3,
+      "stress": 3,
+      "spike": 3
+    }
+  },
+  "scenarios": {
+    "smoke": {
+      "id": "PT-01",
+      "checks": [
+        {
+          "nfr": "PT-01",
+          "desc": "every transaction and assertion passes",
+          "metric": "error-rate",
+          "scope": "overall",
+          "op": "==",
+          "value": 0
+        }
+      ]
+    },
+    "baseline": {
+      "id": "PT-02",
+      "checks": []
+    },
+    "load": {
+      "id": "PT-03",
+      "steady_state": [
+        60,
+        660
+      ],
+      "checks": [
+        {
+          "nfr": "NFR-01",
+          "desc": "p90 per transaction at normal load",
+          "metric": "p90",
+          "scope": "per-transaction",
+          "window": [
+            60,
+            660
+          ],
+          "op": "<=",
+          "value": 1500
+        },
+        {
+          "nfr": "NFR-02",
+          "desc": "average per transaction at normal load",
+          "metric": "average",
+          "scope": "per-transaction",
+          "window": [
+            60,
+            660
+          ],
+          "op": "<=",
+          "value": 1000
+        },
+        {
+          "nfr": "NFR-03",
+          "desc": "error rate at normal load",
+          "metric": "error-rate",
+          "scope": "overall",
+          "window": [
+            60,
+            660
+          ],
+          "op": "<",
+          "value": 1
+        },
+        {
+          "nfr": "NFR-04",
+          "desc": "achieved throughput within 10% of 1.25 req/s",
+          "metric": "throughput",
+          "scope": "overall",
+          "window": [
+            60,
+            660
+          ],
+          "op": "between",
+          "value": [
+            1.125,
+            1.375
+          ]
+        }
+      ]
+    },
+    "stress": {
+      "id": "PT-05",
+      "trend_windows": {
+        "3 users": [
+          0,
+          120
+        ],
+        "6 users": [
+          120,
+          240
+        ],
+        "9 users": [
+          240,
+          360
+        ],
+        "12 users": [
+          360,
+          480
+        ],
+        "15 users": [
+          480,
+          600
+        ]
+      },
+      "checks": [
+        {
+          "nfr": "NFR-05",
+          "desc": "p90 per transaction at peak (12-user step)",
+          "metric": "p90",
+          "scope": "per-transaction",
+          "window": [
+            360,
+            480
+          ],
+          "op": "<=",
+          "value": 2000
+        },
+        {
+          "nfr": "NFR-05",
+          "desc": "error rate at peak (12-user step)",
+          "metric": "error-rate",
+          "scope": "overall",
+          "window": [
+            360,
+            480
+          ],
+          "op": "<",
+          "value": 2
+        }
+      ]
+    },
+    "spike": {
+      "id": "PT-06",
+      "trend_windows": {
+        "pre-spike": [
+          60,
+          120
+        ],
+        "spike": [
+          120,
+          240
+        ],
+        "recovery": [
+          360,
+          420
+        ]
+      },
+      "checks": [
+        {
+          "nfr": "NFR-05",
+          "desc": "p90 per transaction during the spike (15 users)",
+          "metric": "p90",
+          "scope": "per-transaction",
+          "window": [
+            120,
+            240
+          ],
+          "op": "<=",
+          "value": 2000
+        },
+        {
+          "nfr": "NFR-05",
+          "desc": "error rate during the spike",
+          "metric": "error-rate",
+          "scope": "overall",
+          "window": [
+            120,
+            240
+          ],
+          "op": "<",
+          "value": 2
+        },
+        {
+          "nfr": "NFR-06",
+          "desc": "recovery: last 60 s p90 vs pre-spike p90",
+          "metric": "p90-ratio",
+          "scope": "overall",
+          "window": [
+            360,
+            420
+          ],
+          "reference_window": [
+            60,
+            120
+          ],
+          "op": "<=",
+          "value": 1.2
+        }
+      ]
+    }
+  }
+}

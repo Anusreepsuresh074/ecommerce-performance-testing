@@ -1,0 +1,23 @@
+# JMeter run output (raw results, HTML dashboards, logs)
+results/
+reports/
+*.jtl
+jmeter.log
+
+# Local environment (credentials)
+.env
+
+# Claude Code local config. The canonical copies are committed instead: skills/ holds the
+# distributable suite and agents/ the reusable template. .claude/ is only this project's own
+# installed mirror plus its filled-in agent config, so it stays local.
+.claude/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.ruff_cache/

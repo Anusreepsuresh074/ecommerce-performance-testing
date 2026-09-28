@@ -1,0 +1,221 @@
+name: Performance tests
+
+# Built by perf-ci-integration from context/perf-test-plan.md v1.0, section 13 (CI rules):
+#   every push, any branch         -> PT-01 smoke: script validation plus a target health check
+#   manual run (workflow_dispatch) -> smoke or PT-03 load
+#   PT-02 baseline, PT-05 stress and PT-06 spike are LOCAL ONLY. The baseline must come from the
+#   same machine as the runs it's compared with, and GitHub runners share IP addresses with many
+#   other users, so DummyJSON's per-IP rate limit (100 requests / 10 s) can't be relied on.
+# Static checks (lint, plan XML, profile caps) and the offline script validation (local stub) run first and send
+# no requests to DummyJSON.
+# Every run goes through scripts/run-scenario.sh, exactly as locally: caps check, pre-run
+# check, injector CPU sampling, PASS / FAIL / INVALID verdict against config/nfr.json.
+#
+# One-time repo setup:
+#   Settings -> Secrets and variables -> Actions: AUTH_USERNAME, AUTH_PASSWORD (a public DummyJSON test user)
+#   Settings -> Pages -> Deploy from a branch -> gh-pages
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: Scenario (baseline, stress and spike are local only — see the plan, section 13)
+        type: choice
+        options: [smoke, load]
+        default: smoke
+
+# Never two runs at once (plan section 13), and never cancel one halfway: a partial run is invalid.
+concurrency:
+  group: perf-tests
+  cancel-in-progress: false
+
+env:
+  JMETER_VERSION: "5.6.3"
+  SCENARIO: ${{ github.event_name == 'workflow_dispatch' && inputs.scenario || 'smoke' }}
+
+jobs:
+  # Static checks, no network load: a broken script, plan file or profile fails here, before any request
+  # reaches DummyJSON.
+  static-checks:
+    name: Static checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install ruff==0.16.8 shellcheck-py==0.11.0.1
+      - name: Lint shell scripts
+        run: shellcheck scripts/*.sh tests/offline/*.sh
+      - name: Lint and format-check Python scripts
+        run: |
+          ruff check scripts/ tests/
+          ruff format --check scripts/ tests/
+      - name: Validate the JMeter plan, JSON and profiles
+        run: |
+          python3 -c "import xml.dom.minidom, sys; [xml.dom.minidom.parse(f) for f in sys.argv[1:]]" test-plans/*.jmx
+          python3 -c "import json; json.load(open('config/nfr.json'))"
+          for p in config/profiles/*.properties; do python3 scripts/check-caps.py "$(basename "$p" .properties)"; done
+
+  perf:
+    name: ${{ github.event_name == 'workflow_dispatch' && inputs.scenario || 'smoke' }} scenario
+    needs: static-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Use Java 21 (preinstalled on the runner)
+        run: |
+          echo "$JAVA_HOME_21_X64/bin" >> "$GITHUB_PATH"
+          "$JAVA_HOME_21_X64/bin/java" -version
+
+      - name: Cache JMeter
+        uses: actions/cache@v6
+        with:
+          path: ~/jmeter
+          key: jmeter-${{ env.JMETER_VERSION }}
+
+      - name: Install JMeter ${{ env.JMETER_VERSION }} (SHA-512 verified)
+        run: |
+          if [ ! -x "$HOME/jmeter/apache-jmeter-$JMETER_VERSION/bin/jmeter" ]; then
+            mkdir -p ~/jmeter && cd ~/jmeter
+            base="https://archive.apache.org/dist/jmeter/binaries"
+            curl -sSfLO "$base/apache-jmeter-$JMETER_VERSION.tgz"
+            curl -sSfLO "$base/apache-jmeter-$JMETER_VERSION.tgz.sha512"
+            sha512sum -c "apache-jmeter-$JMETER_VERSION.tgz.sha512"
+            tar xzf "apache-jmeter-$JMETER_VERSION.tgz"
+            rm "apache-jmeter-$JMETER_VERSION.tgz" "apache-jmeter-$JMETER_VERSION.tgz.sha512"
+          fi
+          echo "$HOME/jmeter/apache-jmeter-$JMETER_VERSION/bin" >> "$GITHUB_PATH"
+
+      # The script against a local stub of the API: correlation, token scoping, the 429 stop and every profile's
+      # thread shape. No request leaves the runner, so this also runs for forks and Dependabot.
+      - name: Offline script validation (local stub)
+        run: tests/offline/run-offline-checks.sh
+
+      - name: Check secrets
+        id: secrets
+        env:
+          AUTH_USERNAME: ${{ secrets.AUTH_USERNAME }}
+          AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
+        run: |
+          if [ -n "$AUTH_USERNAME" ] && [ -n "$AUTH_PASSWORD" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::AUTH_USERNAME / AUTH_PASSWORD are not available to this run (for example a Dependabot branch) — live run skipped; static checks and offline validation still ran."
+          fi
+
+      - name: Run ${{ env.SCENARIO }} (caps, pre-run check, run, verdict)
+        if: steps.secrets.outputs.available == 'true'
+        env:
+          AUTH_USERNAME: ${{ secrets.AUTH_USERNAME }}
+          AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
+        run: |
+          # Exit 3 = not started (caps or pre-run check). A shared runner IP may be low on
+          # rate-limit budget, so retry the whole start up to 3 times, a minute apart.
+          for attempt in 1 2 3; do
+            scripts/run-scenario.sh "$SCENARIO" && rc=0 || rc=$?
+            [ "$rc" -ne 3 ] && break
+            echo "Not started (attempt $attempt of 3)"
+            [ "$attempt" -lt 3 ] && sleep 60
+          done
+          echo "rc=$rc" >> "$GITHUB_ENV"
+          case "$rc" in
+            0) echo "Verdict: PASS" ;;
+            1) echo "::error::Verdict: FAIL — one or more NFRs not met" ;;
+            2) echo "::error::Verdict: INVALID — see the summary (rate limit, injector CPU or suspension criteria)" ;;
+            *) echo "::error::Run did not start (caps or pre-run check)" ;;
+          esac
+          exit "$rc"
+
+      - name: Build HTML dashboard
+        if: always() && steps.secrets.outputs.available == 'true'
+        run: |
+          run_dir="$(ls -d results/*/ 2>/dev/null | tail -1)"
+          if [ -n "$run_dir" ] && [ -s "$run_dir/results.jtl" ]; then
+            scripts/build-dashboard.sh "$run_dir"
+            echo "RUN_NAME=$(basename "$run_dir")" >> "$GITHUB_ENV"
+          else
+            echo "No run folder with results — nothing to report."
+          fi
+
+      - name: Run-page summary
+        if: always() && env.RUN_NAME != ''
+        run: |
+          if [ -f "results/$RUN_NAME/summary.md" ]; then
+            cat "results/$RUN_NAME/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No summary.md: the evaluation didn't complete — see the run step's log." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        if: always() && env.RUN_NAME != ''
+        with:
+          name: perf-${{ env.SCENARIO }}-${{ github.run_id }}
+          path: |
+            results/${{ env.RUN_NAME }}/
+            reports/${{ env.RUN_NAME }}/
+          retention-days: 14
+
+  # Publishes the dashboard to GitHub Pages as /<scenario>/ (latest run of each scenario),
+  # with an index page. Only from main and manual runs, never from other branches.
+  publish:
+    needs: perf
+    if: always() && needs.perf.result != 'skipped' && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download this run's artifacts
+        id: download
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          pattern: perf-*
+          path: artifact
+          merge-multiple: true
+
+      - name: Fetch the current site
+        uses: actions/checkout@v7
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: site
+
+      - name: Assemble the site
+        id: assemble
+        run: |
+          dash="$(ls -d artifact/reports/*/ 2>/dev/null | tail -1)"
+          if [ -z "$dash" ]; then
+            echo "No dashboard in this run — nothing to publish."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          mkdir -p site && rm -rf site/.git "site/$SCENARIO"
+          cp -r "$dash" "site/$SCENARIO"
+          cp "$(ls -d artifact/results/*/ | tail -1)summary.md" "site/$SCENARIO/summary.md"
+          {
+            echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+            echo '<title>DummyJSON Performance Tests</title><style>body{font-family:system-ui,sans-serif;max-width:40rem;margin:2rem auto;padding:0 1rem;line-height:1.5}</style></head><body>'
+            echo '<h1>DummyJSON Performance Tests</h1><p>Latest JMeter HTML dashboard per scenario, published by CI.</p><ul>'
+            for d in smoke load; do
+              [ -d "site/$d" ] && echo "<li><a href=\"$d/index.html\">$d</a> (<a href=\"$d/summary.md\">verdict summary</a>)</li>"
+            done
+            echo '</ul><p><a href="https://github.com/${{ github.repository }}">Source and Test Summary Report</a></p></body></html>'
+          } > site/index.html
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to GitHub Pages
+        if: steps.assemble.outputs.publish == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: site
