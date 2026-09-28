@@ -43,6 +43,8 @@ This is the performance companion to my [DummyJSON API test automation](https://
   - **Repeatability:** the two load runs' steady-state medians agree within 7%, but their p90s differ by up to 40%, missing the plan's 10% repeatability rule for **3 of 5** transactions. The cause is internet tail latency; it's investigated in the report, section 6.2, with a recommended rule change.
   - **Generous SLAs:** they were set from a `curl` baseline before the JMeter baseline existed, so the measured p90 of about 0.7 s never came near the 1.5 s target. The report recommends tighter SLAs for the next cycle.
 
+**From CI too:** a load run from GitHub Actions also passed (p90 at most 303 ms from GitHub's faster network, 1 dropped connection in 797 requests); see report section 13.
+
 Evidence for every number: [`docs/evidence/`](docs/evidence/), with one verdict summary per run plus all analysis tables, regenerated from the raw results by `scripts/evaluate-run.py` and `scripts/build-report-data.py --evidence`.
 
 ## Approach

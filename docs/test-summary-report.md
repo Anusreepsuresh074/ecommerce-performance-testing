@@ -5,7 +5,8 @@
 | Version | Date | Author | Test plan | Status |
 |---|---|---|---|---|
 | 1.0 | 2026-09-28 | perf-report skill (project owner: Anusreepsuresh074) | [`context/perf-test-plan.md`](../context/perf-test-plan.md) v1.0, approved 2026-09-28 | Superseded by 1.1 |
-| 1.1 | 2026-09-28 | perf-report skill | same | **Final**: adds charts, the committed evidence folder, steady-state medians, UTC run-folder names, time to recover, and a peer review's corrections (repeatability judged on the steady state: 3 of 5 transactions, not 2; the baseline marked VALID; SLA generosity, NFR-05 scope and monitoring deviations stated) |
+| 1.2 | 2026-09-28 | perf-report skill | same | **Final**: adds section 13, the CI load run |
+| 1.1 | 2026-09-28 | perf-report skill | same | Superseded by 1.2: adds charts, the committed evidence folder, steady-state medians, UTC run-folder names, time to recover, and a peer review's corrections (repeatability judged on the steady state: 3 of 5 transactions, not 2; the baseline marked VALID; SLA generosity, NFR-05 scope and monitoring deviations stated) |
 
 ## 2. Executive summary
 
@@ -195,3 +196,22 @@ No run was suspended, repeated or excluded.
 - **Run folders** (not committed): `results/<run>/` holding `results.jtl`, `jmeter.log`, `injector-cpu.csv`, `summary.json` and `summary.md`. Folder names are the UTC start time.
 - **Dashboards** (not committed; CI publishes its smoke and load dashboards to GitHub Pages): `reports/<run>/index.html`.
 - **Reproduce:** see the README, *Running it*. The order is `scripts/run-scenario.sh smoke`, then `baseline`, `load` (twice), `stress`, `spike`, then `scripts/build-dashboard.sh results/<run>`, `scripts/build-report-data.py --evidence` and `scripts/build-charts.py`.
+
+## 13. Addendum: the load test from CI (GitHub Actions)
+
+After the push, PT-03 load was also run once from a GitHub Actions runner (started by hand, as plan section 13 allows): run `20260928T180910Z-shopper-journey-load`, evidence in [`evidence/ci-20260928T180910Z-shopper-journey-load.md`](evidence/ci-20260928T180910Z-shopper-journey-load.md). A CI smoke run before it also passed.
+
+| Item | CI load run | Local load runs (section 6.2) |
+|---|---|---|
+| Verdict | **PASS** | PASS, PASS |
+| p90, worst transaction (steady state) | 303 ms (T01) | 714 / 757 ms |
+| Median, overall (steady state) | 112 ms | about 330–420 ms per transaction |
+| Throughput (steady state) | 1.243 req/s | 1.252 / 1.243 req/s |
+| Errors | 1 in 797 (0.13%): a `SocketException` (connection dropped) on T01 after 63 ms, inside the steady state | 0 / 1 (the timeout, before the steady state) |
+| Lowest `x-ratelimit-remaining` | **42** | 71 / 85 |
+| Injector CPU, worst 15 s | 10.3% | 4.7% / 4.3% |
+
+What it adds:
+- **Location changes the numbers, as the plan warned (section 8).** From GitHub's data centre, close to Cloudflare, responses were 2–5× faster than from the local network. The throughput was identical, so the workload model held. The CI and local runs measure different network paths, so their times are not compared against each other.
+- **The shared-IP risk is real.** The rate-limit budget fell to 42 of 100 while this test used about 12 per 10 s, so other traffic from the runner's IP used the rest. That confirms why stress and spike stay out of CI.
+- **The rare connection failure recurred:** now 2 in about 4,330 requests across all runs (O-1 plus this one), both transient network errors on a single request. It supports recommendation 5 (watch it in CI).
