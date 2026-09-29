@@ -7,7 +7,7 @@ Performance testing of the [DummyJSON](https://dummyjson.com) e-commerce API wit
 
 Virtual users follow a real shopper journey (log in → who am I → browse → search → open a product) at normal, peak and surge load, and every run is judged **PASS, FAIL or INVALID** against the plan's SLAs.
 
-This is the performance companion to my [DummyJSON API test automation](https://github.com/Anusreepsuresh074/ecommerce-api-automation) suite, which tests the same API for correctness.
+This is the performance companion to my [DummyJSON API test automation](https://github.com/Anusreepsuresh074/ecommerce-api-automation) suite and my [Postman + Newman collection](https://github.com/Anusreepsuresh074/dummyjson-postman-newman), which test the same API for correctness.
 
 ## What this project demonstrates
 
