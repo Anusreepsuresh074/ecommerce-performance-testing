@@ -1,23 +1,23 @@
 # PT-01 smoke — PASS
 
-- Run folder: `results/20260929T015410Z-shopper-journey-smoke`
+- Run folder: `results/20260929T052823Z-shopper-journey-smoke`
 - Plan version: 1.0
-- Started: 2026-09-29 01:54:13 UTC, duration 36.4 s, peak active threads 1
+- Started: 2026-09-29 05:28:25 UTC, duration 37.8 s, peak active threads 1
 - Rate-limit (429) responses: 0
-- Lowest x-ratelimit-remaining seen: 95
+- Lowest x-ratelimit-remaining seen: 97
 - CDN cache split: DYNAMIC 10
-- Injector CPU: max 43%, worst 15 s average 15.0% (limit 80%)
+- Injector CPU: max 45%, worst 15 s average 15.3% (limit 80%)
 
 ## Whole run, per transaction
 
 | Transaction | Samples | Errors % | Avg ms | Median | Min | Max | p90 | p95 | p99 | Req/s |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| T01_Login | 2 | 0 | 323.5 | 323.5 | 204 | 443 | 443 | 443 | 443 | 0.083 |
-| T02_Get_Current_User | 2 | 0 | 90.5 | 90.5 | 90 | 91 | 91 | 91 | 91 | 0.083 |
-| T03_Browse_Products | 2 | 0 | 98.5 | 98.5 | 98 | 99 | 99 | 99 | 99 | 0.087 |
-| T04_Search_Products | 2 | 0 | 94.5 | 94.5 | 94 | 95 | 95 | 95 | 95 | 0.091 |
-| T05_View_Product | 2 | 0 | 90.5 | 90.5 | 90 | 91 | 91 | 91 | 91 | 0.087 |
-| **All** | 10 | 0 | 139.5 | 94.5 | 90 | 443 | 419.1 | 443 | 443 | 0.274 |
+| T01_Login | 2 | 0 | 839 | 839 | 217 | 1461 | 1461 | 1461 | 1461 | 0.083 |
+| T02_Get_Current_User | 2 | 0 | 186.5 | 186.5 | 186 | 187 | 187 | 187 | 187 | 0.085 |
+| T03_Browse_Products | 2 | 0 | 190 | 190 | 187 | 193 | 193 | 193 | 193 | 0.089 |
+| T04_Search_Products | 2 | 0 | 191 | 191 | 189 | 193 | 193 | 193 | 193 | 0.086 |
+| T05_View_Product | 2 | 0 | 193 | 193 | 187 | 199 | 199 | 199 | 199 | 0.08 |
+| **All** | 10 | 0 | 319.9 | 191 | 186 | 1461 | 1336.6 | 1461 | 1461 | 0.264 |
 
 ## NFR checks
 
