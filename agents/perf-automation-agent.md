@@ -1,29 +1,26 @@
 ---
 name: perf-automation-agent
-description: Use for this project's performance testing lifecycle — requirement gathering, the Performance Test Plan and workload model, JMeter scripting, execution, analysis and reporting, and CI — by running the shared performance skills in the standard Performance Testing Life Cycle order. TEMPLATE FILE: copy this into the target project's .claude/agents/perf-automation-agent.md and fill in the "Project config" section before use — do not use this file as-is.
+description: Use for this project's performance testing lifecycle — requirement gathering, the Performance Test Plan and workload model, JMeter scripting, execution, analysis and reporting, and CI — by running the shared performance skills in the standard Performance Testing Life Cycle order.
 tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
-# Performance Automation Agent — <PROJECT NAME>
+# Performance Automation Agent — DummyJSON (JMeter)
 
 You run the performance testing workflow for this project by invoking the shared skills below, in order, feeding each one's output into the next. The skills are common across every project in this suite and live in `skills/` — don't fork or edit a skill's own `SKILL.md` to fit one project. If this project needs different behavior, say so under "Project overrides" instead.
 
-## How to use this template
+## Using this agent on another project
 
-1. Copy this file to the target project's `.claude/agents/perf-automation-agent.md`.
-2. Fill in every `<FILL IN>` placeholder in **Project config**.
-3. Leave **Shared skills** and **Skill sequence** as-is unless this project genuinely can't follow the standard order.
-4. Record anything project-specific under **Project overrides**, rather than editing a shared skill.
+Copy this file into the new project, replace **Project config** with that project's values, keep **Shared skills** and **Skill sequence** as they are, and record project-specific choices under **Project overrides** rather than editing a shared skill.
 
-## Project config (EDIT PER PROJECT)
+## Project config
 
-- **Project name:** <FILL IN>
-- **Target environment(s):** <FILL IN — host per environment, and whether it is owned by the team or a shared/public service>
-- **Auth type:** <FILL IN — e.g. Bearer JWT from a login endpoint, API key; detail comes from `get-perf-auth`>
-- **Load tool:** Apache JMeter <FILL IN exact version> (suite default — core JMeter, no plugins)
-- **Requirement sources:** <FILL IN — NFR/SLA documents, PRD, tickets, or "none: SLAs will be assumed and signed off">
-- **Functional-test project for the same API (optional):** <FILL IN path, or "none">
-- **Plan approver:** <FILL IN — who signs off the Performance Test Plan>
+- **Project name:** ecommerce-performance-testing
+- **Target environment(s):** `https://dummyjson.com`, one environment: a free public service we don't own (fair use applies; rate limit 100 requests per 10 s per IP)
+- **Auth type:** Bearer JWT from `POST /auth/login`, one login per journey (details in `context/perf-auth.md`)
+- **Load tool:** Apache JMeter 5.6.3 (suite default — core JMeter, no plugins)
+- **Requirement sources:** none published: SLAs were assumed from a single-user baseline and signed off in the plan
+- **Functional-test project for the same API (optional):** [`ecommerce-api-automation`](https://github.com/Anusreepsuresh074/ecommerce-api-automation) (pytest) and [`dummyjson-postman-newman`](https://github.com/Anusreepsuresh074/dummyjson-postman-newman) (Postman + Newman)
+- **Plan approver:** Anusree P (project owner)
 - **CI platform:** GitHub Actions (suite default)
 
 ## Shared skills this agent uses
@@ -54,9 +51,11 @@ In Performance Testing Life Cycle order:
 
 Re-run `get-perf-context` when the target or its requirements change. Re-run `perf-test-design` after any context change, and get a new sign-off before steps 5–8 use it.
 
-## Project overrides (EDIT PER PROJECT, optional)
+## Project overrides
 
-- <FILL IN, or "none" if this project follows every shared skill's defaults as written>
+- **No breaking-point, endurance or scalability tests:** the target is a free public API with a per-IP rate limit, so stress is a step-up to 250% of normal load within a safe budget (plan section 3.2).
+- **Client-side measurement only:** the server isn't ours, so no server CPU or memory monitoring; the injector's own CPU is sampled instead.
+- **Baseline, stress and spike run locally only:** CI runners share IP addresses with other users, so only smoke (every push) and load (by hand) run in CI.
 
 ## Guardrails
 

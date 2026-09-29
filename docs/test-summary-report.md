@@ -4,9 +4,9 @@
 
 | Version | Date | Author | Test plan | Status |
 |---|---|---|---|---|
-| 1.0 | 2026-09-28 | perf-report skill (project owner: Anusreepsuresh074) | [`context/perf-test-plan.md`](../context/perf-test-plan.md) v1.0, approved 2026-09-28 | Superseded by 1.1 |
-| 1.2 | 2026-09-28 | perf-report skill | same | **Final**: adds section 13, the CI load run |
-| 1.1 | 2026-09-28 | perf-report skill | same | Superseded by 1.2: adds charts, the committed evidence folder, steady-state medians, UTC run-folder names, time to recover, and a peer review's corrections (repeatability judged on the steady state: 3 of 5 transactions, not 2; the baseline marked VALID; SLA generosity, NFR-05 scope and monitoring deviations stated) |
+| 1.0 | 2026-09-28 | Anusree P (drafted with the perf-report skill) | [`context/perf-test-plan.md`](../context/perf-test-plan.md) v1.0, approved 2026-09-28 | Superseded by 1.1 |
+| 1.1 | 2026-09-28 | Anusree P (drafted with the perf-report skill) | same | Superseded by 1.2: adds charts, the committed evidence folder, steady-state medians, UTC run-folder names, time to recover, and a peer review's corrections (repeatability judged on the steady state: 3 of 5 transactions, not 2; the baseline marked VALID; SLA generosity, NFR-05 scope and monitoring deviations stated) |
+| 1.2 | 2026-09-28 | Anusree P (drafted with the perf-report skill) | same | **Final**: adds section 13, the CI load run |
 
 ## 2. Executive summary
 
@@ -146,7 +146,7 @@ Investigation, as the plan requires:
 | O-1 | **One socket timeout (30 s)** on `GET /auth/me`. JMeter received no response in 30 s (`java.net.SocketTimeoutException`); the sample took 37.1 s in total. It was isolated: the requests before and after were normal, and the same user's login 6 s earlier had needed a new connection (`Connect` 257 ms) and took 2.5 s. | Load run 2, +56.2 s (15:48:04 UTC), thread `TG1 1-6`. It fell in ramp-up, outside the 60–660 s SLA window, so it counts in the whole-run error rate (0.13%) but not in NFR-03. | Low: 1 in 3,523 (0.03%). A similar one-off dropped connection was seen by the functional suite on 2026-09-27 ([`ecommerce-api-automation/context/api-context.md`](https://github.com/Anusreepsuresh074/ecommerce-api-automation/blob/main/context/api-context.md)). |
 | O-2 | **Tail latency of 1.5–3.5 s** appears at every load level: 1.2–2.5% of requests in the load, stress and spike runs (none in smoke and baseline, which had only 60 samples between them). | Requests over 1.5 s are spread across all transactions and users, with `Latency` ≈ elapsed and `Connect` = 0 (waiting for the first byte). The p99 per transaction is 1.3–3.0 s in those runs, not counting the O-1 timeout. | Low. It doesn't breach any SLA, but it drives the run-to-run p90 variance. |
 | O-3 | **Load repeatability not met for 3 of 5 transactions** (T01, T02, T04) under the plan's 10% rule. | Section 6.2 | Medium, for how results are interpreted: p90 comparisons between runs from this setup need a wider tolerance. |
-| O-4 | **No measurable degradation from 1 to 15 users.** | Section 6.3: flat p90; medians 0.82–1.14× baseline | Informational |
+| O-4 | **No measurable degradation from 1 to 15 users.** | Sections 6.2–6.3: flat p90; medians 0.85–1.14× baseline at 6 users, 0.82–1.04× at 15 users | Informational |
 | O-5 | **Rate-limit headroom varied independently of our load.** In load run 1, `x-ratelimit-remaining` fell to 71, while our own traffic was about 12.5 requests per 10 s. | `summary.json` of run 3 | Informational. It confirms the plan's risk that the limit is shared with other traffic on the same IP (or counted per server instance), and it justifies the 50% margin. |
 | O-6 | **Every sample reached the origin** (`DYNAMIC`), so the randomized `skip` and correlated `productId` worked as designed. | Cache split in every summary | Informational |
 

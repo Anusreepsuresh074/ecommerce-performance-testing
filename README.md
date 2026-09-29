@@ -1,7 +1,7 @@
 # DummyJSON Performance Testing
 
 ![Performance tests](https://github.com/Anusreepsuresh074/ecommerce-performance-testing/actions/workflows/perf.yml/badge.svg)
-**[Test Summary Report](docs/test-summary-report.md)** · **[Performance Test Plan](context/perf-test-plan.md)** · **[Live dashboards](https://anusreepsuresh074.github.io/ecommerce-performance-testing/)** · **[Beginner's guide + 193 interview Q&A](docs/beginners-guide.md)**
+**[Test Summary Report](docs/test-summary-report.md)** · **[Performance Test Plan](context/perf-test-plan.md)** · **[Live dashboards](https://anusreepsuresh074.github.io/ecommerce-performance-testing/)**
 
 Performance testing of the [DummyJSON](https://dummyjson.com) e-commerce API with **Apache JMeter 5.6.3**, done the way a QA team runs it: requirement gathering → a signed-off **Performance Test Plan** with a workload model → scripting → execution with entry/exit criteria → an analysed **Test Summary Report** → CI.
 

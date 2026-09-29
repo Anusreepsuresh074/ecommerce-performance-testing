@@ -4,9 +4,9 @@
 
 | Version | Date | Author | Status | Approved by |
 |---|---|---|---|---|
-| 0.1 | 2026-09-28 | perf-test-design skill | Superseded by 0.2 (informal draft) | — |
-| 0.2 | 2026-09-28 | perf-test-design skill (project owner: Anusreepsuresh074) | Superseded by 1.0 | — |
-| 1.0 | 2026-09-28 | perf-test-design skill (project owner: Anusreepsuresh074) | **APPROVED** (clerical notes added after execution: section 16 locations, section 18 resolutions, the section 10 search-term result; no change to scope, numbers or rules) | Anusreepsuresh074, 2026-09-28 (in conversation: SLAs, workload model and durations accepted as proposed in section 18) |
+| 0.1 | 2026-09-28 | Anusree P (drafted with the perf-test-design skill) | Superseded by 0.2 (informal draft) | — |
+| 0.2 | 2026-09-28 | Anusree P (drafted with the perf-test-design skill) | Superseded by 1.0 | — |
+| 1.0 | 2026-09-28 | Anusree P (drafted with the perf-test-design skill) | **APPROVED** (clerical notes added after execution: section 16 locations, section 18 resolutions, the section 10 search-term result; no change to scope, numbers or rules) | Anusree P, 2026-09-28 (SLAs, workload model and durations accepted as proposed in section 18) |
 
 Version 0.2 replaces 0.1, the same day. It restructures the plan into the standard Performance Test Plan format, adds a workload model with pacing and Little's Law, adds a Baseline scenario, moves SLAs to the 90th percentile, and adds entry/exit/suspension/resumption criteria.
 
