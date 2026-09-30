@@ -4,7 +4,7 @@
 
 | Version | Date | Author | Test plan | Status |
 |---|---|---|---|---|
-| 1.0 | 2026-09-28 | Anusree P (drafted with the perf-report skill) | [`context/perf-test-plan.md`](../context/perf-test-plan.md) v1.0, approved 2026-09-28 | Superseded by 1.1 |
+| 1.0 | 2026-09-28 | Anusree P (drafted with the perf-report skill) | [`context/perf-test-plan.md`](../context/perf-test-plan.md) v1.0, self-approved 2026-09-28 (portfolio project; no external stakeholder) | Superseded by 1.1 |
 | 1.1 | 2026-09-28 | Anusree P (drafted with the perf-report skill) | same | Superseded by 1.2: adds charts, the committed evidence folder, steady-state medians, UTC run-folder names, time to recover, and a peer review's corrections (repeatability judged on the steady state: 3 of 5 transactions, not 2; the baseline marked VALID; SLA generosity, NFR-05 scope and monitoring deviations stated) |
 | 1.2 | 2026-09-28 | Anusree P (drafted with the perf-report skill) | same | **Final**: adds section 13, the CI load run |
 
@@ -15,10 +15,10 @@
 Key findings:
 
 1. **Normal load (6 users, 1.25 req/s) sits far inside the SLAs.** p90 per transaction was 498–757 ms against a 1500 ms target, and averages 400–514 ms against 1000 ms, in both load runs. The achieved throughput was 1.252 and 1.243 req/s, within ±10% of the 1.25 target, so the workload model was delivered as designed.
-2. **No degradation up to 250% load.** Median response times at 15 users were 0.82–1.04× the single-user baseline, and the stress p90 stayed between 655 and 849 ms at every step, with 0 errors. Within the tested range, response time is governed by network latency, not by server load.
+2. **No degradation up to 250% load.** Median response times at 15 users were 0.82–1.04× the single-user baseline, and the stress p90 stayed between 646 and 849 ms at every step, with 0 errors. Within the tested range, response time is governed by network latency, not by server load.
 3. **Spikes are absorbed.** A jump from 6 to 15 users in 10 s changed nothing measurable: the p90 was 564 ms before and 560 ms during the spike. After the spike the p90 was 495 ms, 0.88× the pre-spike value against a 1.2× limit.
 4. **One real error in 3,523 samples: a 30 s socket timeout** on `T02_Get_Current_User` in load run 2 (section 7, O-1). It started at +56.2 s, 3.8 s before the steady-state window, so NFR-03 (steady state) shows 0% while the whole run shows 0.13%. Both are reported; even counted in full, it's far under the 1% limit. It was isolated, and a similar one-off dropped connection was seen in the functional suite on 2026-09-27.
-5. **Tail latency varies between runs.** The two load runs' steady-state medians agree within 7%, but their p90s differ by up to 40% (T04: 498 vs 695 ms). That breaks the plan's 10% repeatability criterion for **3 of 5 transactions** (T01, T02, T04; section 6.2). The cause is scattered 1.5–2.6 s responses over the public internet, not load.
+5. **Tail latency varies between runs.** The two load runs' steady-state medians agree within 7%, but their p90s differ by up to 40% (T04: 498 vs 695 ms). That breaks the plan's 10% repeatability criterion for **3 of 5 transactions** (T01, T02, T04; plan §7, report §6.2). The cause is scattered 1.5–2.6 s responses over the public internet, not load.
 6. **The SLAs were generous.** They were set before the JMeter baseline, from a `curl` baseline that opened a new TLS connection per request (median 618–839 ms). The JMeter baseline, with reused connections, measured medians of 300–406 ms. A p90 of 686–757 ms against a 1500 ms target means these SLAs were never close to being breached; tighter ones are recommended in section 9.
 
 **Recommendation:** accept the SLAs as met for the tested range, and tighten them from the JMeter baseline for the next cycle. Treat the rare timeout as a known, low-frequency risk of the public service. For future comparisons, judge repeatability on medians plus a tail tolerance (section 9).
@@ -96,13 +96,13 @@ All figures are for the **steady state**, the window the SLAs are judged on. The
 | T04_Search_Products | 400 | 431 | 7.8% | 498 | 695 | **39.6%** | 334 | 344 | 3.0% | **no** |
 | T05_View_Product | 435 | 446 | 2.6% | 714 | 723 | 1.3% | 337 | 342 | 1.5% | yes |
 
-**Repeatability** (plan section 7: average and p90 within 10%): met by T03 and T05; **not met by T01, T02 and T04 (3 of 5)**.
+**Repeatability** (plan §7, report §6.2: average and p90 within 10%): met by T03 and T05; **not met by T01, T02 and T04 (3 of 5)**.
 
 Investigation, as the plan requires:
 - **The medians agree within 1.5–6.8%,** so typical behaviour repeats. The misses are all in the slow tail: T01's p90 by 0.4 points, T02 and T04 clearly.
 - **Run 2 caught more slow requests.** Its steady state had more 1.5–2.6 s responses (T02: 9 requests over 1 s against 2 in run 1). In those, `Latency` ≈ elapsed time and `Connect` = 0, so the time was spent waiting for the first byte on an already-open connection.
 - **The slow responses show no pattern:** they're spread over every transaction and every virtual user, with nothing tied to time or step. That points to latency variance on the internet path or at the shared service, not to load: the load was identical in both runs (1.252 vs 1.243 req/s).
-- **The sample size limits p90 stability.** About 150 steady-state samples per transaction puts the p90 at the 15th-slowest request, so a few extra slow requests move it a lot. The plan's claim that about 750 samples per run give "stable percentiles" (plan section 7) holds for the median, not for the p90.
+- **The sample size limits p90 stability.** About 150 steady-state samples per transaction puts the p90 at the 15th-slowest request, so a few extra slow requests move it a lot. The plan's claim that about 750 samples per run give "stable percentiles" (plan §7) holds for the median, not for the p90.
 **Load vs baseline (medians; load run 2 steady state vs the baseline's whole run):** 0.85–1.14×. In effect there's no degradation from 1 to 6 users.
 
 ![p90 every 60 s for both load runs, both far below the 1500 ms SLA line](images/load-repeatability.svg)
@@ -134,6 +134,7 @@ Investigation, as the plan requires:
 
 - The 9 extra users all logged in within 10 s. The resulting burst of logins didn't move T01's p90 above 729 ms.
 - Response times were no different during the spike, and recovery was immediate (0.88× the pre-spike p90).
+- **NFR-06 passed trivially:** the spike caused no measurable degradation (p90 560 ms during the spike vs 564 ms before it), so there was nothing to recover from. The run shows the surge was absorbed; it doesn't show how the API recovers from a real slowdown.
 - **Time to recover:** the first 20 s window after the spike ended (240–260 s) already had a p90 of 661 ms, within 1.2× the pre-spike 564 ms (limit 677 ms). Three later 20 s windows went above the limit (280–340 s: 736, 707 and 1478 ms), but each holds only about 25 samples, so one or two slow requests set its p90. NFR-06 is judged on the plan's 60 s recovery window (360–420 s).
 - One 20-second window after the spike (320–340 s) shows a p90 of about 1.5 s. It holds 23 samples, 2 of them slow (T05 2.1 s and T01 1.9 s), both from the same virtual user. That's the O-2 tail pattern, not an after-effect of the spike: the windows either side are back at about 500–700 ms.
 
@@ -145,7 +146,7 @@ Investigation, as the plan requires:
 |---|---|---|---|
 | O-1 | **One socket timeout (30 s)** on `GET /auth/me`. JMeter received no response in 30 s (`java.net.SocketTimeoutException`); the sample took 37.1 s in total. It was isolated: the requests before and after were normal, and the same user's login 6 s earlier had needed a new connection (`Connect` 257 ms) and took 2.5 s. | Load run 2, +56.2 s (15:48:04 UTC), thread `TG1 1-6`. It fell in ramp-up, outside the 60–660 s SLA window, so it counts in the whole-run error rate (0.13%) but not in NFR-03. | Low: 1 in 3,523 (0.03%). A similar one-off dropped connection was seen by the functional suite on 2026-09-27 ([`ecommerce-api-automation/context/api-context.md`](https://github.com/Anusreepsuresh074/ecommerce-api-automation/blob/main/context/api-context.md)). |
 | O-2 | **Tail latency of 1.5–3.5 s** appears at every load level: 1.2–2.5% of requests in the load, stress and spike runs (none in smoke and baseline, which had only 60 samples between them). | Requests over 1.5 s are spread across all transactions and users, with `Latency` ≈ elapsed and `Connect` = 0 (waiting for the first byte). The p99 per transaction is 1.3–3.0 s in those runs, not counting the O-1 timeout. | Low. It doesn't breach any SLA, but it drives the run-to-run p90 variance. |
-| O-3 | **Load repeatability not met for 3 of 5 transactions** (T01, T02, T04) under the plan's 10% rule. | Section 6.2 | Medium, for how results are interpreted: p90 comparisons between runs from this setup need a wider tolerance. |
+| O-3 | **Load repeatability not met for 3 of 5 transactions** (T01, T02, T04) under the plan's 10% rule. | Plan §7, report §6.2 | Medium, for how results are interpreted: p90 comparisons between runs from this setup need a wider tolerance. |
 | O-4 | **No measurable degradation from 1 to 15 users.** | Sections 6.2–6.3: flat p90; medians 0.85–1.14× baseline at 6 users, 0.82–1.04× at 15 users | Informational |
 | O-5 | **Rate-limit headroom varied independently of our load.** In load run 1, `x-ratelimit-remaining` fell to 71, while our own traffic was about 12.5 requests per 10 s. | `summary.json` of run 3 | Informational. It confirms the plan's risk that the limit is shared with other traffic on the same IP (or counted per server instance), and it justifies the 50% margin. |
 | O-6 | **Every sample reached the origin** (`DYNAMIC`), so the randomized `skip` and correlated `productId` worked as designed. | Cache split in every summary | Informational |
@@ -170,12 +171,12 @@ Investigation, as the plan requires:
 | Plan item | Deviation | Impact |
 |---|---|---|
 | Test data (section 10) | `perfume` returned 0 products during the `[To verify]` check and was dropped; 9 search terms were used | None: every term returned results in every run |
-| PT-03 repeatability (section 7) | Criterion not met for T01, T02 and T04; investigated (section 6.2) and reported rather than re-run | Interpretation only; SLA results are unaffected |
+| PT-03 repeatability (plan §7, report §6.2) | Criterion not met for T01, T02 and T04; investigated (report §6.2) and reported rather than re-run | Interpretation only; SLA results are unaffected |
 | Pre-run minimum (section 12.1) | The ≥ 80 rate-limit headroom is checked at the start of each run, as planned. During load run 1 it fell to 71. | None: no `429`; the plan doesn't require headroom during a run |
 | Suspension criteria (section 12.3) | Only the `429` rule stops a run live, built into the script. The error-rate rule (> 10% for 1 minute) and the injector-CPU rule (> 80%) are evaluated from the results after the run, and they mark it INVALID if broken. | None this time: neither was ever close (worst 60 s error rate 2.0%, from the O-1 timeout, against a 10% limit; worst CPU 7.7% against 80%). A live check for both would need a JMeter listener or an external watchdog; it's listed as a script improvement. |
 
 | Load-generator monitoring (section 11) | The plan says the injector's CPU and memory are sampled; only CPU was (every 5 s, from `/proc/stat`) | Low: CPU never passed 7.7%, and JMeter ran with its default heap without any memory warning in `jmeter.log`. Memory sampling is a script improvement. |
-| NFR-05 scope (section 5) | NFR-05 is labelled "peak (200% of normal)" but lists "the peak of PT-06" in its scope, and PT-06 peaks at 15 users (250%). It was applied as its scope states: at the 12-user step of PT-05 **and** at PT-06's 15-user spike. | None: applying a 200% SLA at 250% load is stricter, and it passed |
+| NFR-05 scope (section 5) | Plan v1.0 labelled NFR-05 "peak (200% of normal)" but also listed "the peak of PT-06" in its scope, and PT-06 peaks at 15 users (250%). It was applied as its scope states: at the 12-user step of PT-05 (200%) **and** at PT-06's 15-user spike (250%). The plan's wording has since been clarified to name both levels (clerical, no change to the target). | None: applying a 200% SLA at 250% load is stricter, and it passed |
 
 No run was suspended, repeated or excluded.
 

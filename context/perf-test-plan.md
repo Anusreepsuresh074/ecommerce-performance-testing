@@ -6,7 +6,7 @@
 |---|---|---|---|---|
 | 0.1 | 2026-09-28 | Anusree P (drafted with the perf-test-design skill) | Superseded by 0.2 (informal draft) | — |
 | 0.2 | 2026-09-28 | Anusree P (drafted with the perf-test-design skill) | Superseded by 1.0 | — |
-| 1.0 | 2026-09-28 | Anusree P (drafted with the perf-test-design skill) | **APPROVED** (clerical notes added after execution: section 16 locations, section 18 resolutions, the section 10 search-term result; no change to scope, numbers or rules) | Anusree P, 2026-09-28 (SLAs, workload model and durations accepted as proposed in section 18) |
+| 1.0 | 2026-09-28 | Anusree P (drafted with the perf-test-design skill) | **APPROVED** (clerical notes added after execution: section 16 locations, section 18 resolutions, the section 10 search-term result, the NFR-05 wording naming both the 200% and 250% levels; no change to scope, numbers or rules) | Self-approved (portfolio project; no external stakeholder), Anusree P, 2026-09-28 (SLAs, workload model and durations accepted as proposed in section 18) |
 
 Version 0.2 replaces 0.1, the same day. It restructures the plan into the standard Performance Test Plan format, adds a workload model with pacing and Little's Law, adds a Baseline scenario, moves SLAs to the 90th percentile, and adds entry/exit/suspension/resumption criteria.
 
@@ -55,7 +55,7 @@ The NFR questionnaire (`context/perf-context.md`) found **no stakeholder SLA**, 
 | NFR-02 | `average` response time | per transaction, at normal load | **≤ 1000 ms** | `[Assumption]` about 1.2× the slowest baseline median |
 | NFR-03 | `error-rate` | overall, at normal load | **< 1%** | `[Assumption]` common QA default for a stable service |
 | NFR-04 | `throughput` achieved | overall, at normal load | **within ±10%** of the target 1.25 req/s | standard check that the workload model was actually delivered |
-| NFR-05 | `p90` response time and `error-rate` | per transaction, at peak (200% of normal: the 12-user step of PT-05, and the peak of PT-06) | **p90 ≤ 2000 ms, errors < 2%** | `[Assumption]` some slowdown is acceptable at peak |
+| NFR-05 | `p90` response time and `error-rate` | per transaction, at peak: the 12-user step of PT-05 (200% of normal) and the 15-user peak of PT-06 (250% of normal) | **p90 ≤ 2000 ms, errors < 2%** | `[Assumption]` some slowdown is acceptable at peak; the same target applied at the 250% spike peak is stricter |
 | NFR-06 | recovery after a spike | `p90` overall, recovery window vs pre-spike window (PT-06) | **≤ 1.2×** the pre-spike p90 | `[Assumption]` "recovered" means back within 20% |
 | NFR-07 | `rate-limited` (`429`) | every scenario | **0** | test-validity rule (`LIMIT-rate-100-per-10s`). A `429` means *our load* was wrong, so the run is **invalid**, not failed. |
 
@@ -244,4 +244,4 @@ In this order, following section 13's gaps and caps:
 4. **Network:** one request showed `x-ratelimit-remaining: 50`. If your network is shared (an office, for example), the pre-run check will catch it, but runs from home give cleaner results.
 
 ---
-**Signed off 2026-09-28 (version 1.0). `jmeter-test-plan` may build from this version.**
+**Self-approved 2026-09-28 (version 1.0; portfolio project, no external stakeholder). `jmeter-test-plan` may build from this version.**

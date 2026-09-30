@@ -1,13 +1,21 @@
 # DummyJSON Performance Testing
 
 ![Performance tests](https://github.com/Anusreepsuresh074/ecommerce-performance-testing/actions/workflows/perf.yml/badge.svg)
-**[Test Summary Report](docs/test-summary-report.md)** · **[Performance Test Plan](context/perf-test-plan.md)** · **[Live dashboards](https://anusreepsuresh074.github.io/ecommerce-performance-testing/)**
+**[Test Summary Report](docs/test-summary-report.md)** · **[Performance Test Plan](context/perf-test-plan.md)** · **[Live dashboards (latest CI smoke and load)](https://anusreepsuresh074.github.io/ecommerce-performance-testing/)**
 
 Performance testing of the [DummyJSON](https://dummyjson.com) e-commerce API with **Apache JMeter 5.6.3**, done the way a QA team runs it: requirement gathering → a signed-off **Performance Test Plan** with a workload model → scripting → execution with entry/exit criteria → an analysed **Test Summary Report** → CI.
 
 Virtual users follow a real shopper journey (log in → who am I → browse → search → open a product) at normal, peak and surge load, and every run is judged **PASS, FAIL or INVALID** against the plan's SLAs.
 
 This is the performance companion to my [DummyJSON API test automation](https://github.com/Anusreepsuresh074/ecommerce-api-automation) suite and my [Postman + Newman collection](https://github.com/Anusreepsuresh074/dummyjson-postman-newman), which test the same API for correctness.
+
+### Key findings in 30 seconds
+
+- **Result:** all 6 runs valid and every SLA met from 1 to 15 users (250% of normal load), with no degradation: worst gated p90 796 ms against 1.5–2 s targets, 1 error in 3,523 samples. The one plan criterion missed is load-run repeatability (p90 spread, 3 of 5 transactions).
+- **A hidden rate limit:** DummyJSON's docs mention none, but its source code has 100 requests per 10 s per IP. Confirmed live from the `x-ratelimit-*` headers, it became the budget for every load level (at most 31% of it used, 0 `429`s).
+- **Bypassing the CDN cache:** plain `/products` URLs come back as Cloudflare cache `HIT`s, so the script randomises `skip` and correlates a random `productId`. All but one sample (a timeout with no response) reached the origin server (`DYNAMIC`).
+
+![Stress test: median and p90 stay flat from 3 to 15 users while throughput rises linearly](docs/images/stress-trend.svg)
 
 ## What this project demonstrates
 
@@ -25,22 +33,20 @@ This is the performance companion to my [DummyJSON API test automation](https://
 
 ## Results (2026-09-28)
 
-**All 6 runs valid; every gated run meets every SLA.** 3,523 samples, 1 error (an isolated 30 s socket timeout), 0 rate-limit responses.
+**All 6 runs valid; every gated run meets every SLA (NFR-01 to NFR-07).** The plan's load-repeatability criterion was missed for 3 of 5 transactions (see below); it's an interpretation criterion, not an SLA. 3,523 samples, 1 error (an isolated 30 s socket timeout), 0 rate-limit responses.
 
 | Scenario | Users | p90, worst transaction (SLA) | Errors | Verdict |
 |---|---|---|---|---|
 | PT-01 Smoke | 1 | — | 0 | ✅ PASS |
-| PT-02 Baseline | 1 | 1093 ms (10 samples) | 0 | ✔️ VALID (reference, not gated) |
+| PT-02 Baseline | 1 | 1093 ms (indicative only, n=10; median 367 ms) | 0 | ✔️ VALID (reference, not gated) |
 | PT-03 Load, run 1 / run 2 | 6 | 714 / 757 ms (≤ 1500), steady state | 0% / 0% in steady state; whole run 0% / 0.13% (the timeout, 3.8 s before steady state) | ✅ PASS / ✅ PASS |
-| PT-05 Stress (step-up) | 3 → 15 | 796 ms at the 12-user step (≤ 2000) | 0 | ✅ PASS |
-| PT-06 Spike | 6 → 15 → 6 | 729 ms in the spike (≤ 2000); recovery 0.88× | 0 | ✅ PASS |
-
-![Stress test: median and p90 stay flat from 3 to 15 users while throughput rises linearly](docs/images/stress-trend.svg)
+| PT-05 Stress (step-up) | 3 → 15 | 796 ms at the 12-user step, 200% (≤ 2000) | 0 | ✅ PASS |
+| PT-06 Spike | 6 → 15 → 6 | 729 ms at the 15-user spike peak, 250% (≤ 2000); recovery 0.88× | 0 | ✅ PASS |
 
 - **No degradation from 1 to 15 users:** medians at 15 users were 0.82–1.04× the single-user baseline.
 - **Throughput scaled linearly**, exactly as the workload model predicted (0.208 req/s per user).
 - **Two findings need care:**
-  - **Repeatability:** the two load runs' steady-state medians agree within 7%, but their p90s differ by up to 40%, missing the plan's 10% repeatability rule for **3 of 5** transactions. The cause is internet tail latency; it's investigated in the report, section 6.2, with a recommended rule change.
+  - **Repeatability:** the two load runs' steady-state medians agree within 7%, but their p90s differ by up to 40%, missing the plan's 10% repeatability rule for **3 of 5** transactions (plan §7, report §6.2). The cause is internet tail latency; the report investigates it and recommends a rule change.
   - **Generous SLAs:** they were set from a `curl` baseline before the JMeter baseline existed, so the measured p90 of about 0.7 s never came near the 1.5 s target. The report recommends tighter SLAs for the next cycle.
 
 **From CI too:** a load run from GitHub Actions also passed (p90 at most 303 ms from GitHub's faster network, 1 dropped connection in 797 requests); see report section 13.
@@ -95,7 +101,7 @@ DummyJSON publishes no SLA, so these are **assumed SLAs, signed off** in the pla
 | NFR-02 | Average ≤ 1000 ms per transaction at normal load |
 | NFR-03 | Error rate < 1% at normal load |
 | NFR-04 | Achieved throughput within ±10% of the 1.25 req/s target |
-| NFR-05 | At peak (200%): p90 ≤ 2000 ms, errors < 2% |
+| NFR-05 | At peak (the 12-user stress step, 200% of normal) and at the spike peak (15 users, 250%): p90 ≤ 2000 ms, errors < 2% |
 | NFR-06 | After a spike, p90 back within 1.2× the pre-spike value |
 | NFR-07 | Zero `429` rate-limit responses; any `429` stops the run and marks it invalid |
 
